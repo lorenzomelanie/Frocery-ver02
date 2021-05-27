@@ -22,6 +22,8 @@ import {
 	ORDER_PAY_FAIL,
 	ORDER_PAY_REQUEST,
 	ORDER_PAY_SUCCESS,
+	ORDER_SUMMARY_REQUEST,
+	ORDER_SUMMARY_SUCCESS,
 } from '../constants/orderConstants';
 
 export const createOrder = (order) => async (dispatch, getState) => {
@@ -112,6 +114,10 @@ export const listOrderMine = () => async (dispatch, getState) => {
 };
 
 export const listOrders = ({ seller = '' }) => async (dispatch, getState) => {
+
+	let i = 0;
+	let TotalRevenue = 0
+
 	dispatch({ type: ORDER_LIST_REQUEST });
 	const {
 		userSignin: { userInfo },
@@ -120,8 +126,13 @@ export const listOrders = ({ seller = '' }) => async (dispatch, getState) => {
 		const { data } = await Axios.get(`/api/orders?seller=${seller}`, {
 			headers: { Authorization: `Bearer ${userInfo.token}` },
 		});
-		console.log(data);
-		dispatch({ type: ORDER_LIST_SUCCESS, payload: data });
+		for(i = 0; i < data.length; i++){
+			TotalRevenue += data[i]['taxPrice'];
+		}
+		TotalRevenue = TotalRevenue/2;
+		console.log(TotalRevenue);
+
+		dispatch({ type: ORDER_LIST_SUCCESS, payload: data,TotalRevenue: TotalRevenue });
 	} catch (error) {
 		const message =
 			error.response && error.response.data.message
@@ -171,3 +182,23 @@ export const deliverOrder = (orderId) => async (dispatch, getState) => {
 		dispatch({ type: ORDER_DELIVER_FAIL, payload: message });
 	}
 };
+export const summaryOrder = () => async (dispatch, getState) => {
+	dispatch({ type: ORDER_SUMMARY_REQUEST });
+	const {
+	  userSignin: { userInfo },
+	} = getState();
+	try {
+	  const { data } = await Axios.get('/api/orders/summary', {
+		headers: { Authorization: `Bearer ${userInfo.token}` },
+	  });
+	  dispatch({ type: ORDER_SUMMARY_SUCCESS, payload: data });
+	} catch (error) {
+	  dispatch({
+		type: ORDER_CREATE_FAIL,
+		payload:
+		  error.response && error.response.data.message
+			? error.response.data.message
+			: error.message,
+	  });
+	}
+  };

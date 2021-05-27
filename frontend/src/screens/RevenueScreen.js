@@ -5,7 +5,7 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { ORDER_DELETE_RESET } from '../constants/orderConstants';
 
-export default function OrderListScreen(props) {
+export default function RevenueScreen(props) {
 	const sellerMode = props.match.path.indexOf('/seller') >= 0;
 
 	const orderList = useSelector((state) => state.orderList);
@@ -34,7 +34,7 @@ export default function OrderListScreen(props) {
 	};
 	return (
 		<div>
-			<h2 class="title">Orders</h2>
+			<h2 class="title">Revenue</h2>
 			<div>
 				{loadingDelete && <LoadingBox></LoadingBox>}
 				{errorDelete && <MessageBox variant="danger">{errorDelete}</MessageBox>}
@@ -55,47 +55,33 @@ export default function OrderListScreen(props) {
 							<th>User</th>
 							<th>Date</th>
 							<th>Total</th>
+                            <th>Sub-Revenue</th>
 							<th>Paid</th>
 							<th>Delivered</th>
-							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						{orders.map((order) => (
+						{
+                        orders.map((order) => (
 							<tr key={order._id}>
 								<td>{order._id}</td>
 								<td>{order.user.name}</td>
 								<td>{order.createdAt.substring(0, 10)}</td>
 								<td>&#8369;{order.totalPrice.toFixed(2)}</td>
+                                <td>&#8369;{order.taxPrice.toFixed(2)/2}</td>
 								<td>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</td>
 								<td>
 									{order.isDelivered
 										? order.deliveredAt.substring(0, 10)
 										: 'No'}
 								</td>
-								<td>
-									<button
-										type="button"
-										className="medium"
-										onClick={() => {
-											props.history.push(`/order/${order._id}`);
-										}}
-									>
-										Details
-									</button>
-									<button
-										type="button"
-										className="medim"
-										onClick={() => deleteHandler(order)}
-									>
-										Delete
-									</button>
-								</td>
 							</tr>
-						))}
+						))
+                        }
 					</tbody>
 				</table>
 			)}
+            {/* <h1>Revenue Income: </h1> */}
 		</div>
 	);
 }
